@@ -26,6 +26,7 @@ def plotting(names, shape='All'):
                 continue
             weights = weights.eval()
             if shape=='All' or weights.shape[0:2] == shape:
+                print(name)
                 flat_weights = np.reshape(weights, [weights.shape[0], weights.shape[1], -1])
             
                 if compute_mean:
@@ -33,6 +34,8 @@ def plotting(names, shape='All'):
             
                 if compute_sym and flat_weights.shape[0:2] == (3, 3):
                     plot_weight_symmetry(flat_weights, name)
+            else:
+                print('Skip...')
     print('Done.')
 
 def plot_weight_mean(flat_weights, name):
@@ -54,17 +57,12 @@ def plot_weight_symmetry(flat_weights, name):
     flat_weights = np.reshape(flat_weights,(f_w_size*f_w_size,-1))
     flat_weights = np.reshape(flat_weights.T,(-1,f_w_size,f_w_size))
     lenw = flat_weights.shape[0]
-    s_ = np.zeros((4,lenw))
-    s_[0,:] = [is_sym(mat, type='HORIZONTAL') for mat in flat_weights]
-    s_[1,:] = [is_sym(mat, type='VERTICAL') for mat in flat_weights]
-    s_[2,:] = [is_sym(mat, type='DIAGSX') for mat in flat_weights]
-    s_[3,:] = [is_sym(mat, type='DIAGDX') for mat in flat_weights]
-    as_ = np.zeros((4,lenw))
-    as_[0,:] = [is_sym(mat, type='HORIZONTAL',asym=True) for mat in flat_weights]
-    as_[1,:] = [is_sym(mat, type='VERTICAL',asym=True) for mat in flat_weights]
-    as_[2,:] = [is_sym(mat, type='DIAGSX',asym=True) for mat in flat_weights]
-    as_[3,:] = [is_sym(mat, type='DIAGDX',asym=True) for mat in flat_weights]
-    
+    s_ = np.zeros((lenw,4))
+    s_[:,:] = [[is_sym(mat, type='HORIZONTAL'),is_sym(mat, type='VERTICAL'),is_sym(mat, type='DIAGSX'),is_sym(mat, type='DIAGDX')] for mat in flat_weights]
+    s_= s_.T
+    as_ = np.zeros((lenw,4))
+    as_[:,:] = [[is_sym(mat, type='HORIZONTAL',asym=True),is_sym(mat, type='VERTICAL',asym=True),is_sym(mat, type='DIAGSX',asym=True),is_sym(mat, type='DIAGDX',asym=True)] for mat in flat_weights]
+    as_=as_.T
     
     s_summary = np.sum(s_,axis=0)
     #more than 2 symmetry axes
@@ -76,7 +74,7 @@ def plot_weight_symmetry(flat_weights, name):
     as_summary = np.sum(as_,axis=0)
     
     #Dovrebbero essere insiemi disgiunti, ma per tolleranze troppo alte considero simmetrie pari
-    as_count = 100*min(np.sum(as_ > 0), 100 - s_strong_count - s_weak_count)/lenw
+    as_count = min(100*np.sum(as_ > 0)/lenw, 100 - s_strong_count - s_weak_count)
     
     #no symm
     none_count = 100 - s_strong_count - s_weak_count - as_count  
