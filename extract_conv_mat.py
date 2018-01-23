@@ -97,10 +97,10 @@ def is_odd(mat, type='HORIZONTAL'):
     rev_mat = np.copy(mat)
     rev_mat *= -1
     if type=='HORIZONTAL':
-        rev_mat[:,1] = mat[:,1]
+        rev_mat[1,:] = mat[1,:]
         rev_mat = np.flip(rev_mat, 0)
     if type=='VERTICAL':
-        rev_mat[1,:] = mat[1,:]
+        rev_mat[:,1] = mat[:,1]
         rev_mat = np.flip(rev_mat, 1)
     if type=='DIAGSX':
         rev_mat[[0,1,2],[0,1,2]] = mat[[0,1,2],[0,1,2]]
@@ -174,14 +174,6 @@ def extract_convmat_resnet():
         names = set(['/'.join(name.split('/')[:-1]) for name in names])
         plotting(names, shape=m_size)
 
-class TestSymCheckFunctions(unittest.TestCase):
-
-    def test_even(self):
-        a = np.array([[1, 2, 1], [5, 5, 5], [1,2,1]])
-        self.assertTrue(is_sym(a, type='HORIZONTAL'))
-        self.assertTrue(is_sym(a, type='VERTICAL'))
-        self.assertTrue(is_sym(a, type='DIAGSX'))
-        self.assertTrue(is_sym(a, type='DIAGDX'))
 
 
 if __name__ == '__main__':
