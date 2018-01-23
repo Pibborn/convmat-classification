@@ -73,19 +73,23 @@ def plot_weight_symmetry(flat_weights, name):
     
     as_summary = np.sum(as_,axis=0)
     
-    #Dovrebbero essere insiemi disgiunti, ma per tolleranze troppo alte considero simmetrie pari
-    as_count = min(100*np.sum(as_ > 0)/lenw, 100 - s_strong_count - s_weak_count)
+    as_summary = np.sum(s_,axis=0)
+    #more than 2 symmetry axes
+    as_strong_count = 100*np.sum(as_summary >= 2)/lenw 
+    
+    #less than 2 symmetry axes
+    as_weak_count = 100*np.sum(as_summary == 1)/lenw    
     
     #no symm
-    none_count = 100 - s_strong_count - s_weak_count - as_count  
+    none_count = 100 - s_strong_count - s_weak_count - as_strong_count - as_weak_count  
     
     
     _,ax = plt.subplots()
     ax.set_ylabel('Percentage')
     ax.set_title('Convolutional weights matrices - Symmetry')
-    ax.set_xticklabels(('Multiple\nEven Symmetry', 'Single\nEven Symmetry', 'Odd\nSymmetry', 'None'), fontsize = 5.0)
-    ax.set_xticks(list(range(4)))
-    plt.bar(list(range(4)),[s_strong_count,s_weak_count,as_count,none_count])
+    ax.set_xticklabels(('Multiple\nEven Symmetry', 'Single\nEven Symmetry', 'Multiple\nOdd Symmetry','Single\nOdd Symmetry', 'None'), fontsize = 5.0)
+    ax.set_xticks(list(range(5)))
+    plt.bar(list(range(5)),[s_strong_count,s_weak_count,as_strong_count,as_weak_count,none_count])
     plt.ylim((0, 100))
     filename = name.replace('/', '-')
     plt.savefig('sym_0p01/'+ plots_dirname + '/' + filename + '-' + str(f_w_size) + 'x' + str(f_w_size) + '-sym.pdf')
