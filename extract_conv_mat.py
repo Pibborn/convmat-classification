@@ -12,7 +12,7 @@ from numpy.lib.shape_base import apply_along_axis
 import unittest
 
 ##Constants
-RELATIVETOLL = 1e-2
+RELATIVETOLL = 1e-1
 ABSOLUTETOLL = 0
 
 def plotting(names, shape='All'):
@@ -58,10 +58,10 @@ def plot_weight_symmetry(flat_weights, name):
     flat_weights = np.reshape(flat_weights.T,(-1,f_w_size,f_w_size))
     lenw = flat_weights.shape[0]
     s_ = np.zeros((lenw,4))
-    s_[:,:] = [[is_sym(mat, type='HORIZONTAL'),is_sym(mat, type='VERTICAL'),is_sym(mat, type='DIAGSX'),is_sym(mat, type='DIAGDX')] for mat in flat_weights]
+    s_[:,:] = [[is_even(mat, type='HORIZONTAL'),is_even(mat, type='VERTICAL'),is_even(mat, type='DIAGSX'),is_even(mat, type='DIAGDX')] for mat in flat_weights]
     s_= s_.T
     as_ = np.zeros((lenw,4))
-    as_[:,:] = [[is_sym(mat, type='HORIZONTAL',asym=True),is_sym(mat, type='VERTICAL',asym=True),is_sym(mat, type='DIAGSX',asym=True),is_sym(mat, type='DIAGDX',asym=True)] for mat in flat_weights]
+    as_[:,:] = [[is_odd(mat, type='HORIZONTAL'),is_odd(mat, type='VERTICAL'),is_odd(mat, type='DIAGSX'),is_odd(mat, type='DIAGDX')] for mat in flat_weights]
     as_=as_.T
     
     s_summary = np.sum(s_,axis=0)
@@ -92,12 +92,29 @@ def plot_weight_symmetry(flat_weights, name):
     plt.clf()
     
     
-    
-def is_sym(mat, type='HORIZONTAL', asym=False):
+def is_odd(mat, type='HORIZONTAL'):
     assert mat.shape == (3,3)
     rev_mat = np.copy(mat)
-    if asym:
-        rev_mat *= -1
+    rev_mat *= -1
+    if type=='HORIZONTAL':
+        rev_mat[:,1] = mat[:,1]
+        rev_mat = np.flip(rev_mat, 0)
+    if type=='VERTICAL':
+        rev_mat[1,:] = mat[1,:]
+        rev_mat = np.flip(rev_mat, 1)
+    if type=='DIAGSX':
+        rev_mat[[0,1,2],[0,1,2]] = mat[[0,1,2],[0,1,2]]
+        rev_mat = rev_mat.T
+    if type=='DIAGDX':
+        rev_mat[[0,1,2],[2,1,0]] = mat[[0,1,2],[2,1,0]]
+        rev_mat = rev_mat.T
+        rev_mat = np.flip(rev_mat, 0)
+        rev_mat = np.flip(rev_mat, 1) 
+    return np.allclose(mat, rev_mat, RELATIVETOLL, ABSOLUTETOLL)
+    
+def is_even(mat, type='HORIZONTAL'):
+    assert mat.shape == (3,3)
+    rev_mat = np.copy(mat)
     if type=='HORIZONTAL':
         rev_mat = np.flip(rev_mat, 0)
     if type=='VERTICAL':
